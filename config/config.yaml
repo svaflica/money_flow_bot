@@ -1,0 +1,57 @@
+categories:
+  - "Продуктовые"
+  - "Рестораны/бары"
+  - "Обязательные постоянные"
+  - "Необязательные постоянные"
+  - "Одежда"
+  - "Транспорт"
+  - "Переводы"
+  - "Другое"
+
+flow_types:
+  - "in"
+  - "out"
+
+functions:
+  - "Посмотреть план на месяц"
+  - "Добавить/Изменить план на месяц"
+  - "Статистика за период"
+  - "Добавить трату/поступление"
+  - "Очистить данные"
+
+operations:
+  max_errors: 5
+
+cache:
+  type: redis
+  redis:
+    host: localhost
+    port: 6379
+    db: 0
+
+db:
+  type: sqlite
+  sqlite:
+    path: ''
+    tables: ['category', 'plan', 'flow', 'flow_type']
+    check_tables: 'SELECT name FROM sqlite_master WHERE type ="table" AND name IN ('
+    create_tables: '
+          CREATE TABLE category (id INTEGER PRIMARY KEY, name TEXT NOT NULL); CREATE TABLE flow_type (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+          CREATE TABLE plan (id INTEGER PRIMARY KEY, value INTEGER NOT NULL, category_id INTEGER NOT NULL, chat_id INTEGER NOT NULL,
+                              FOREIGN KEY (category_id)  REFERENCES category (id));
+          CREATE TABLE flow (id INTEGER PRIMARY KEY, value INTEGER NOT NULL, description TEXT NOT NULL, category_id INTEGER NOT NULL, date TEXT NOT NULL,
+                              chat_id INTEGER NOT NULL, flow_type_id INTEGER NOT NULL, FOREIGN KEY (category_id)  REFERENCES category (id),
+                              FOREIGN KEY (flow_type_id) REFERENCES flow_type (id));
+    '
+    insert_categories: "INSERT INTO category (name) VALUES (?);"
+    insert_flow_types: "INSERT INTO flow_type (name) VALUES (?);"
+    insert_plan: "INSERT INTO plan (chat_id, value, category_id) VALUES (:chat_id, :value, :category_id);"
+    insert_flow: "INSERT INTO flow (chat_id, value, category_id, date, description, flow_type_id) VALUES (:chat_id, :value, :category_id, :date, :description, :flow_type_id);"
+    update_plan: "UPDATE plan SET value = :value WHERE chat_id = :chat_id AND category_id = :category_id;"
+    select_categories: "SELECT name, id from category"
+    select_flow_types: "SELECT name, id from flow_type"
+    select_plan_by_chat_id: "SELECT name, value, chat_id FROM plan JOIN category ON category.id = plan.category_id WHERE chat_id="
+
+
+bot:
+  id: ""
