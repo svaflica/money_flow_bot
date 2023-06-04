@@ -5,7 +5,7 @@ import yaml
 
 from bot import BaseBot
 
-CONFIG_PATH = '../config/config.yaml'
+CONFIG_PATH = '/config/config.yaml'
 
 with open(CONFIG_PATH, 'r') as f:
     config = yaml.safe_load(f)
